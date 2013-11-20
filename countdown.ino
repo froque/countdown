@@ -25,19 +25,6 @@ boolean segments[BASE_DIGITS][N_SEGMENTS] =
 {true,true,true,false,false,false,false},
 {true,true,true,true,true,true,true},
 {true,true,true,true,false,true,true}};
-/*
-boolean segments[BASE_DIGITS][N_SEGMENTS] =
-{{HIGH,HIGH,HIGH,HIGH,HIGH,HIGH,LOW},
-{LOW,HIGH,HIGH,LOW,LOW,LOW,LOW},
-{HIGH,HIGH,LOW,HIGH,HIGH,LOW,HIGH},
-{HIGH,HIGH,HIGH,HIGH,LOW,LOW,HIGH},
-{LOW,HIGH,HIGH,LOW,LOW,HIGH,HIGH},
-{HIGH,LOW,HIGH,HIGH,LOW,HIGH,HIGH},
-{HIGH,LOW,HIGH,HIGH,HIGH,HIGH,HIGH},
-{HIGH,HIGH,HIGH,LOW,LOW,LOW,LOW},
-{HIGH,HIGH,HIGH,HIGH,HIGH,HIGH,HIGH},
-{HIGH,HIGH,HIGH,HIGH,LOW,HIGH,HIGH}};
-*/
 
 int address_pins[N_SEGMENTS] = {13,12,11,10,9,8,7};
 
