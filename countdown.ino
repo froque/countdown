@@ -13,6 +13,7 @@
 
 RTC_DS1307 rtc;
 DateTime goal( 2014, 12, 31, 0, 0, 0);
+int previous_days_diff = -1;
 
 boolean segments[BASE_DIGITS][N_SEGMENTS] = 
 {{true,true,true,true,true,true,false},
@@ -102,15 +103,21 @@ void loop() {
   //DateTime goal( 2014, 12, 31, 0, 0, 0);
 
   int days_diff = goal.unixtime()/PERIOD_S - now.unixtime()/ PERIOD_S;
-  int days_digits[N_DIGITS];
-  convert_to_digits( days_diff, days_digits);
-
-  for (int k=0; k< N_DIGITS; k++){
-    //set_digit_address(k);
-    clear_digit();
-    set_digit( days_digits[k]);
-    delay(BETWEEN_DIGITS_MS);
+  
+  if( previous_days_diff < days_diff || previous_days_diff == -1){
+    previous_days_diff = days_diff;
+    
+    int days_digits[N_DIGITS];
+    convert_to_digits( days_diff, days_digits);
+  
+    for (int k=0; k< N_DIGITS; k++){
+      //set_digit_address(k);
+      clear_digit();
+      set_digit( days_digits[k]);
+      delay(BETWEEN_DIGITS_MS);
+    }
+    
   }
-   
+  
   delay(PERIOD_S / (N_PER_PERIOD *1.0) * 1000);
 }
