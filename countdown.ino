@@ -1,6 +1,7 @@
 #include <Wire.h>
 #include <EEPROM.h>
 #include "RTClib.h"
+#include "DHT.h"
 
 #define N_SEGMENTS 7
 #define BASE_DIGITS 10
@@ -10,7 +11,10 @@
 #define PERIOD_S 86400L
 #define N_PER_PERIOD 10
 #define EEPROM_BASE_ADDRESS 0
+#define DHTPIN 4
+#define DHTTYPE DHT11
 
+DHT dht(DHTPIN, DHTTYPE);
 RTC_DS1307 rtc;
 DateTime goal( 2014, 12, 31, 0, 0, 0);
 int previous_days_diff = -1;
@@ -83,7 +87,8 @@ void setup() {
   Serial.begin(57600);
   Wire.begin();  
   rtc.begin();
-
+  dht.begin();
+  
   if (! rtc.isrunning()) {
     Serial.println("RTC is NOT running!");
     // following line sets the RTC to the date & time this sketch was compiled
@@ -99,6 +104,22 @@ void setup() {
 
 
 void loop() {
+  
+  float h = dht.readHumidity();
+  float t = dht.readTemperature();
+  
+  // check if returns are valid, if they are NaN (not a number) then something went wrong!
+  if (isnan(t) || isnan(h)) {
+    Serial.println("Failed to read from DHT");
+  } else {
+    Serial.print("Humidity: "); 
+    Serial.print(h);
+    Serial.print(" %\t");
+    Serial.print("Temperature: "); 
+    Serial.print(t);
+    Serial.println(" *C");
+  }
+  
   DateTime now = rtc.now();
   //DateTime goal( 2014, 12, 31, 0, 0, 0);
 
@@ -119,5 +140,6 @@ void loop() {
     
   }
   
-  delay(PERIOD_S / (N_PER_PERIOD *1.0) * 1000);
+//  delay(PERIOD_S / (N_PER_PERIOD *1.0) * 1000);
+  delay(2000);
 }
