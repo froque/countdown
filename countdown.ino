@@ -6,17 +6,19 @@
 #define N_SEGMENTS 7
 #define BASE_DIGITS 10
 #define N_DIGITS 3
-#define PULSE_MS 300
+#define PULSE_MS 200
 #define BETWEEN_DIGITS_MS 300
-#define PERIOD_S 86400L
+//#define PERIOD_S 86400L // One day
+//#define PERIOD_S 3600L  // One hour
+#define PERIOD_S 60L      // One minute
 #define N_PER_PERIOD 10
 #define EEPROM_BASE_ADDRESS 0
 #define DHTPIN 4
 #define DHTTYPE DHT11
 
-DHT dht(DHTPIN, DHTTYPE);
+//DHT dht(DHTPIN, DHTTYPE);
 RTC_DS1307 rtc;
-DateTime goal( 2014, 12, 31, 0, 0, 0);
+DateTime goal( 2014, 1, 3, 0, 0, 0);
 int previous_days_diff = -1;
 
 boolean segments[BASE_DIGITS][N_SEGMENTS] = 
@@ -31,7 +33,10 @@ boolean segments[BASE_DIGITS][N_SEGMENTS] =
 {true,true,true,true,true,true,true},
 {true,true,true,true,false,true,true}};
 
-int address_pins[N_SEGMENTS] = {13,12,11,10,9,8,7};
+//int address_segments[N_SEGMENTS] = {6,7,8,9,10,11,12};
+int address_segments[N_SEGMENTS] = {12, 11, 10, 9, 8, 7, 6};
+int reset_pin = 2;
+int address_digits[N_DIGITS] = {3,4,5};
 
 void showDate(const char* txt, const DateTime& dt) {
     Serial.print(txt);
@@ -57,20 +62,30 @@ void showDate(const char* txt, const DateTime& dt) {
     Serial.println();
 }
 
-void clear_digit(){
+void clear_segments(){
+  /*for (int k=0; k<N_SEGMENTS; k++){
+      digitalWrite(address_segments[k], LOW);      
+  }*/
+  digitalWrite(reset_pin, HIGH);
+  delay(PULSE_MS);
+  digitalWrite(reset_pin, LOW);
+}
+
+void set_segments( int value){
   for (int k=0; k<N_SEGMENTS; k++){
-      digitalWrite(address_pins[k], LOW);      
+    if(segments[value][k]){
+      digitalWrite(address_segments[k], HIGH); 
+      delay(PULSE_MS);
+      digitalWrite(address_segments[k], LOW); 
+    }
   }
 }
 
-void set_digit( int value){
-  for (int k=0; k<N_SEGMENTS; k++){
-    if(segments[value][k]){
-      digitalWrite(address_pins[k], HIGH); 
-      delay(PULSE_MS);
-      digitalWrite(address_pins[k], LOW); 
-    }
-  }
+void set_digit(int k, int value){
+  digitalWrite(address_digits[k], HIGH);
+  clear_segments();
+  set_segments(value);
+  digitalWrite(address_digits[k], LOW);
 }
 
 void convert_to_digits(int n, int digits[N_DIGITS]){
@@ -87,24 +102,29 @@ void setup() {
   Serial.begin(57600);
   Wire.begin();  
   rtc.begin();
-  dht.begin();
+  //dht.begin();
   
   if (! rtc.isrunning()) {
     Serial.println("RTC is NOT running!");
     // following line sets the RTC to the date & time this sketch was compiled
     //rtc.adjust(DateTime(__DATE__, __TIME__));
   }
+  
   for (int k=0; k< N_SEGMENTS; k++){
-    pinMode(address_pins[k], OUTPUT);
+    pinMode(address_segments[k], OUTPUT);
   }
   
+  pinMode(reset_pin, OUTPUT);
+  
+  for (int k=0; k< N_DIGITS; k++){
+    pinMode(address_digits[k], OUTPUT);
+  }
   
 }
 
 
-
 void loop() {
-  
+/*  
   float h = dht.readHumidity();
   float t = dht.readTemperature();
   
@@ -119,27 +139,35 @@ void loop() {
     Serial.print(t);
     Serial.println(" *C");
   }
+  */
   
   DateTime now = rtc.now();
-  //DateTime goal( 2014, 12, 31, 0, 0, 0);
 
   int days_diff = goal.unixtime()/PERIOD_S - now.unixtime()/ PERIOD_S;
   
-  if( previous_days_diff < days_diff || previous_days_diff == -1){
+  
+  Serial.println(days_diff);
+  Serial.println(previous_days_diff);
+  if( days_diff < previous_days_diff || previous_days_diff == -1){
+    
     previous_days_diff = days_diff;
     
     int days_digits[N_DIGITS];
     convert_to_digits( days_diff, days_digits);
   
     for (int k=0; k< N_DIGITS; k++){
-      //set_digit_address(k);
+      /*
+      digitalWrite(address_digits[k], HIGH);
       clear_digit();
       set_digit( days_digits[k]);
       delay(BETWEEN_DIGITS_MS);
+      digitalWrite(address_digits[k], LOW);
+      */
+      set_digit(k,days_digits[k]);
     }
     
   }
   
-//  delay(PERIOD_S / (N_PER_PERIOD *1.0) * 1000);
-  delay(2000);
+  delay(PERIOD_S / (N_PER_PERIOD *1.0) * 1000);
+// delay(2000);
 }
