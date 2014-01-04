@@ -98,8 +98,16 @@ void convert_to_digits(int n, int digits[N_DIGITS]){
   digits[0] = n;
 }
 
+void set_digits(int days_diff){
+    int days_digits[N_DIGITS];
+    convert_to_digits( days_diff, days_digits);  
+    for (int k=0; k< N_DIGITS; k++){
+      set_digit(k,days_digits[k]);
+    }
+}
+
 void setup() {                
-  Serial.begin(57600);
+  //Serial.begin(57600);
   Wire.begin();  
   rtc.begin();
   //dht.begin();
@@ -119,7 +127,8 @@ void setup() {
   for (int k=0; k< N_DIGITS; k++){
     pinMode(address_digits[k], OUTPUT);
   }
-  
+  // test all segments with 8's
+  set_digits(888);
 }
 
 
@@ -144,28 +153,10 @@ void loop() {
   DateTime now = rtc.now();
 
   int days_diff = goal.unixtime()/PERIOD_S - now.unixtime()/ PERIOD_S;
-  
-  
-  Serial.println(days_diff);
-  Serial.println(previous_days_diff);
-  if( days_diff < previous_days_diff || previous_days_diff == -1){
-    
+   
+  if( days_diff < previous_days_diff || previous_days_diff == -1){   
     previous_days_diff = days_diff;
-    
-    int days_digits[N_DIGITS];
-    convert_to_digits( days_diff, days_digits);
-  
-    for (int k=0; k< N_DIGITS; k++){
-      /*
-      digitalWrite(address_digits[k], HIGH);
-      clear_digit();
-      set_digit( days_digits[k]);
-      delay(BETWEEN_DIGITS_MS);
-      digitalWrite(address_digits[k], LOW);
-      */
-      set_digit(k,days_digits[k]);
-    }
-    
+    set_digits(days_diff);
   }
   
   delay(PERIOD_S / (N_PER_PERIOD *1.0) * 1000);
