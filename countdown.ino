@@ -18,7 +18,9 @@
 
 //DHT dht(DHTPIN, DHTTYPE);
 RTC_DS1307 rtc;
-DateTime goal( 2014, 1, 3, 0, 0, 0);
+//DateTime goal( 2014, 9, 13, 0, 0, 0);
+DateTime goal( 2014, 1, 6, 0, 0, 0);
+
 int previous_days_diff = -1;
 
 boolean segments[BASE_DIGITS][N_SEGMENTS] = 
@@ -63,9 +65,6 @@ void showDate(const char* txt, const DateTime& dt) {
 }
 
 void clear_segments(){
-  /*for (int k=0; k<N_SEGMENTS; k++){
-      digitalWrite(address_segments[k], LOW);      
-  }*/
   digitalWrite(reset_pin, HIGH);
   delay(PULSE_MS);
   digitalWrite(reset_pin, LOW);
@@ -89,6 +88,8 @@ void set_digit(int k, int value){
 }
 
 void convert_to_digits(int n, int digits[N_DIGITS]){
+  n = n % 1000;
+  
   digits[2] = n/100;
   
   n = n - digits[2]*100;
@@ -102,6 +103,7 @@ void set_digits(int days_diff){
     int days_digits[N_DIGITS];
     convert_to_digits( days_diff, days_digits);  
     for (int k=0; k< N_DIGITS; k++){
+      //Serial.println(days_digits[k]);
       set_digit(k,days_digits[k]);
     }
 }
@@ -127,6 +129,7 @@ void setup() {
   for (int k=0; k< N_DIGITS; k++){
     pinMode(address_digits[k], OUTPUT);
   }
+  
   // test all segments with 8's
   set_digits(888);
 }
@@ -149,10 +152,18 @@ void loop() {
     Serial.println(" *C");
   }
   */
+
+  //showDate("compiled", DateTime(__DATE__, __TIME__));
   
   DateTime now = rtc.now();
-
+  //showDate("now", now);
+  //showDate("goal", goal);
+  
   int days_diff = goal.unixtime()/PERIOD_S - now.unixtime()/ PERIOD_S;
+  //Serial.println(days_diff);
+  if (days_diff < 0 ){
+    days_diff = 0;
+  }
    
   if( days_diff < previous_days_diff || previous_days_diff == -1){   
     previous_days_diff = days_diff;
