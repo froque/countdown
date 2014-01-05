@@ -8,9 +8,10 @@
 #define N_DIGITS 3
 #define PULSE_MS 200
 #define BETWEEN_DIGITS_MS 300
-//#define PERIOD_S 86400L // One day
+#define PERIOD_S 86400L // One day
 //#define PERIOD_S 3600L  // One hour
-#define PERIOD_S 60L      // One minute
+//#define PERIOD_S 60L      // One minute
+//#define PERIOD_S 10L      // ten seconds
 #define N_PER_PERIOD 10
 #define EEPROM_BASE_ADDRESS 0
 #define DHTPIN 4
@@ -18,8 +19,9 @@
 
 //DHT dht(DHTPIN, DHTTYPE);
 RTC_DS1307 rtc;
-//DateTime goal( 2014, 9, 13, 0, 0, 0);
-DateTime goal( 2014, 1, 6, 0, 0, 0);
+DateTime goal( 2014, 9, 13, 0, 0, 0);
+//DateTime goal( 2014, 1, 6, 0, 0, 0);
+//DateTime goal( 2014, 1, 5, 19, 0, 0);
 
 int previous_days_diff = -1;
 
@@ -109,7 +111,7 @@ void set_digits(int days_diff){
 }
 
 void setup() {                
-  //Serial.begin(57600);
+  Serial.begin(57600);
   Wire.begin();  
   rtc.begin();
   //dht.begin();
@@ -156,11 +158,11 @@ void loop() {
   //showDate("compiled", DateTime(__DATE__, __TIME__));
   
   DateTime now = rtc.now();
-  //showDate("now", now);
-  //showDate("goal", goal);
+  showDate("now", now);
+  showDate("goal", goal);
   
   int days_diff = goal.unixtime()/PERIOD_S - now.unixtime()/ PERIOD_S;
-  //Serial.println(days_diff);
+  Serial.println(days_diff);
   if (days_diff < 0 ){
     days_diff = 0;
   }
